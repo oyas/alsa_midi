@@ -1,0 +1,67 @@
+
+1. raspbian jessie lite を本家サイト(https://www.raspberrypi.org/downloads/raspbian/)からダウンロードしてきて、ddでインストール。ddが動く端末で以下を実行
+# dd bs=4M if=｛2015-11-21-raspbian-jessie-lite.img等のイメージファイル｝ of=/dev/｛ｓｄカードのデバイスの名前｝
+
+Raspbian（raspberry pi用のOS）のインストール方法は、ネットにたくさんあるのでそれも参考に
+
+
+2. raspberry pi にsdカードを挿し起動(コンソール画面になる)
+ユーザー名： pi
+パスワード： raspberry
+でログイン
+
+
+3. raspberry pi の初期設定をします
+$ sudo raspi-config
+*キーボード設定をします。以下のように選択していってください
+5 Internationalisation Options
+-> I3 Change Keyboard Layout
+-> Generic 105-key (intl) PC
+-> Japanese
+-> 以降は適当に設定
+
+設定を反映させるため、再起動します。
+$ sudo reboot
+
+
+4. 自動ログイン設定
+エディタで以下のファイルを作成する。
+例えばviエディタで編集する場合、
+$ sudo vi /etc/systemd/system/getty@tty1.service.d/autologin.conf
+
+書き込む内容(3行)：
+
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty --autologin pi --noclear %I 38400 linux
+
+
+書き込んだら再起動します。
+$ sudo reboot
+起動したら、ユーザー名・パスワードを求められることなく自動ログインするはずです
+
+
+5. プログラムに必要なライブラリのインストール。
+$ sudo apt-get install libasound2-dev
+
+一旦電源を切って、SDカードを取り出してください
+$ sudo shutdown now
+
+
+6. PCでプログラムのソースコード等必要なファイルをコピーします。
+/home/pi/ に、以下の2ファイルを追加します。
+-  alsa_midi.c
+-  setting.txt
+
+
+/home/pi/.bashrc の最後に以下の3行を書き込みます。
+
+# alsa_midi の自動コンパイル＆起動
+gcc alsa_midi.c -lasound -o alsa_midi
+./alsa_midi
+
+
+7. 完成です。raspberry pi で起動してみましょう。
+
+
+3と5以外は、PCで設定できます。raspberry pi で操作しづらい場合はPCで作業するといいでしょう。
